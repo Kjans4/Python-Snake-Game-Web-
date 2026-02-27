@@ -1,3 +1,4 @@
+
 def move_snake(snake, direction, food, grid_size=20):
     # Convert JS list to Python list
     snake_list = list(snake)
