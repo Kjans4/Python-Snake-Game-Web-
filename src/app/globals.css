@@ -37,3 +37,11 @@ button {
 button:hover {
   background-color: #666;
 }
+
+/*New*/
+@media (max-width: 450px) {
+  canvas {
+    width: 300px;
+    height: 300px;
+  }
+}

@@ -7,6 +7,12 @@ export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [highScore, setHighScore] = useState(0);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("snakeHighScore");
+    if (saved) setHighScore(parseInt(saved));
+  }, []);
 
   useEffect(() => {
     if (isLoading || !pyodide) return;
@@ -29,7 +35,6 @@ export default function Home() {
 
     const interval = setInterval(() => {
       try {
-        // Run Python logic
         const result = pyodide.runPython(`
           move_snake(${JSON.stringify(snake)}, "${direction}", ${JSON.stringify(food)})
         `)?.toJs();
@@ -37,8 +42,14 @@ export default function Home() {
         if (!result) {
           setGameOver(true);
           clearInterval(interval);
-          return;
+
+        const currentHighScore = parseInt(localStorage.getItem("snakeHighScore") || "0");
+        if (score > currentHighScore) {
+          localStorage.setItem("snakeHighScore", score.toString());
+          setHighScore(score);
         }
+        return;
+      }
 
         snake = result.get("snake");
         if (result.get("ate")) {
@@ -46,7 +57,6 @@ export default function Home() {
           food = [Math.floor(Math.random() * 20), Math.floor(Math.random() * 20)];
         }
 
-        // Draw Game
         ctx.fillStyle = "#000";
         ctx.fillRect(0, 0, 400, 400);
         ctx.fillStyle = "#00FF00";
@@ -72,6 +82,12 @@ export default function Home() {
           <p>Score: {score} {gameOver && "— GAME OVER!"}</p>
           <canvas ref={canvasRef} width={400} height={400} style={{ border: '5px solid #333' }} />
           {gameOver && <button onClick={() => window.location.reload()} style={{ display: 'block', margin: '20px auto', padding: '10px 20px' }}>Restart</button>}
+
+          <div className="status-container">
+            <p style={{ color: '#FFD700' }}>🏆 High Score: {highScore}</p> 
+            {gameOver && <h2 style={{ color: 'red' }}>GAME OVER!</h2>}
+          </div>
+          
         </>
       )}
     </main>
